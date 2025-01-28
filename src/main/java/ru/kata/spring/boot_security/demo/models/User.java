@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.models;
 
+import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,48 +14,57 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serial;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "user")
 public class User implements UserDetails {
 
+    @Serial
+    private static final long serialVersionUID = 3839729901238284112L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")
-    @NotNull(message = "Username can't be null")
+    @Column(name = "username", unique = true, nullable = false)
+    @NotEmpty(message = "Name should't be empty")
+    @NotNull(message = "Username should't be null")
     @Size(min = 1, max = 30, message = "Username must be between 1 and 30 characters")
     private String username;
 
     @Column(name = "first_name")
-    @NotNull(message = "Name can't be null")
+    @NotEmpty(message = "Name should't be empty")
+    @NotNull(message = "Name should't be null")
     @Size(min = 1, max = 30, message = "Name must be between 1 and 30 characters")
     private String name;
 
     @Column(name = "last_name")
-    @NotNull(message = "Surname can't be null")
+    @NotEmpty(message = "Name should't be empty")
+    @NotNull(message = "Surname should't be null")
     @Size(min = 1, max = 30, message = "Surname must be between 1 and 30 characters")
     private String surname;
 
     @Column(name = "age")
-    @NotNull(message = "Age can't be null")
+    @NotNull(message = "Age should't be null")
     @Min(value = 18, message = "Age must be over 18 years (inclusive)")
     private Integer age;
 
     @Column(name = "email")
-    @NotNull(message = "Email can't be null")
+    @Email
+    @NotNull(message = "Email should't be null")
     private String email;
 
-    @Column(name = "password")
-    @NotNull(message = "Password can't be null")
+    @Column(name = "password", nullable = false)
+    @NotNull(message = "Password should't be null")
     private String password;
 
     @ManyToMany
@@ -62,7 +72,7 @@ public class User implements UserDetails {
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private List<Role> roles;
+    private Set<Role> roles;
 
     public User() {
 
@@ -75,7 +85,7 @@ public class User implements UserDetails {
             final Integer age,
             final String email,
             final String password,
-            final List<Role> roles
+            final Set<Role> roles
     ) {
         this.username = username;
         this.name = name;
@@ -134,11 +144,11 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public List<Role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(final List<Role> roles) {
+    public void setRoles(final Set<Role> roles) {
         this.roles = roles;
     }
 
@@ -184,21 +194,16 @@ public class User implements UserDetails {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
         final User user = (User) o;
-        return Objects.equals(id, user.id) &&
-               Objects.equals(username, user.username) &&
-               Objects.equals(name, user.name) &&
-               Objects.equals(surname, user.surname) &&
-               Objects.equals(age, user.age) &&
-               Objects.equals(email, user.email);
+        return id != null && Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, name, surname, age, email);
+        return getClass().hashCode();
     }
 
     @Override

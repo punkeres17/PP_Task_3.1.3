@@ -2,14 +2,23 @@ package ru.kata.spring.boot_security.demo.models;
 
 import org.springframework.security.core.GrantedAuthority;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import java.io.Serial;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "role")
 public class Role implements GrantedAuthority {
 
+    @Serial
+    private static final long serialVersionUID = -4133755492093144563L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,7 +27,7 @@ public class Role implements GrantedAuthority {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    private List<User> users;
+    private Set<User> users;
 
     public Role() {
     }
@@ -48,11 +57,11 @@ public class Role implements GrantedAuthority {
         this.name = role;
     }
 
-    public List<User> getUsers() {
+    public Set<User> getUsers() {
         return users;
     }
 
-    public void setUsers(final List<User> users) {
+    public void setUsers(final Set<User> users) {
         this.users = users;
     }
 
